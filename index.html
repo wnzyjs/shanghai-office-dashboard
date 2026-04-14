@@ -49,13 +49,23 @@
         <div>
           <div class="hero-brand-badge">Applied Value Shanghai Office</div>
           <p class="eyebrow">Dashboard</p>
-          <h2>Keep your kitchen stocked without the spreadsheet chaos.</h2>
-          <p class="hero-copy">Monitor current stock, flag low inventory, and prioritize the next snack or beverage order for the team.</p>
-        </div>
-        <div class="hero-actions">
-          <div class="sync-indicator" id="sync-indicator">Local mode</div>
-          <button class="primary-btn" type="button">Generate Restock List</button>
-          <button class="secondary-btn" type="button">Export Snapshot</button>
+          <div class="hero-gallery" aria-label="Food and beverage highlights">
+            <article class="gallery-tile tile-drinks" aria-label="Sparkling drinks">
+              <span class="tile-icon icon-drinks" aria-hidden="true"></span>
+            </article>
+            <article class="gallery-tile tile-coffee" aria-label="Coffee break">
+              <span class="tile-icon icon-coffee" aria-hidden="true"></span>
+            </article>
+            <article class="gallery-tile tile-fruit" aria-label="Fresh fruit">
+              <span class="tile-icon icon-fruit" aria-hidden="true"></span>
+            </article>
+            <article class="gallery-tile tile-snacks" aria-label="Snack shelf">
+              <span class="tile-icon icon-snacks" aria-hidden="true"></span>
+            </article>
+            <article class="gallery-tile tile-dairy" aria-label="Dairy corner">
+              <span class="tile-icon icon-dairy" aria-hidden="true"></span>
+            </article>
+          </div>
         </div>
       </section>
 
@@ -144,6 +154,48 @@
             <div id="category-breakdown" class="breakdown-list"></div>
           </section>
         </section>
+      </section>
+
+      <section class="card wishlist-card" id="wishlist">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Wish List</p>
+            <h3>Requested items not in stock yet</h3>
+          </div>
+        </div>
+
+        <div class="wishlist-layout">
+          <form id="wishlist-form" class="wishlist-form">
+            <label>
+              <span>Requested item</span>
+              <input id="wish-item" type="text" placeholder="Example: Kombucha" required>
+            </label>
+
+            <label>
+              <span>Category</span>
+              <select id="wish-category" required>
+                <option value="Beverages">Beverages</option>
+                <option value="Snacks">Snacks</option>
+                <option value="Fresh">Fresh</option>
+                <option value="Supplies">Supplies</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Requested by</span>
+              <input id="wish-requester" type="text" placeholder="Team member name" required>
+            </label>
+
+            <label>
+              <span>Notes</span>
+              <input id="wish-notes" type="text" placeholder="Example: low sugar option">
+            </label>
+
+            <button class="table-btn" type="submit">Add To Wish List</button>
+          </form>
+
+          <div id="wishlist-items" class="wishlist-items"></div>
+        </div>
       </section>
     </main>
   </div>

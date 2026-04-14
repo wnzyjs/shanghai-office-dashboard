@@ -1,4 +1,5 @@
 const STORAGE_KEY = "applied-value-shanghai-inventory";
+const WISHLIST_STORAGE_KEY = "applied-value-shanghai-wishlist";
 const APP_CONFIG = window.APP_CONFIG || {};
 const API_BASE_URL = (APP_CONFIG.apiBaseUrl || "").trim();
 const REFRESH_INTERVAL_MS = Number(APP_CONFIG.refreshIntervalMs) || 15000;
@@ -15,6 +16,7 @@ const defaultInventory = [
 ];
 
 let inventory = loadInventory();
+let wishlist = loadWishlist();
 
 const inventoryBody = document.getElementById("inventory-body");
 const restockList = document.getElementById("restock-list");
@@ -36,6 +38,12 @@ const itemDailyUseInput = document.getElementById("item-daily-use");
 const itemVendorInput = document.getElementById("item-vendor");
 const itemMonthlySpendInput = document.getElementById("item-monthly-spend");
 const itemThresholdInput = document.getElementById("item-threshold");
+const wishlistForm = document.getElementById("wishlist-form");
+const wishlistItems = document.getElementById("wishlist-items");
+const wishItemInput = document.getElementById("wish-item");
+const wishCategoryInput = document.getElementById("wish-category");
+const wishRequesterInput = document.getElementById("wish-requester");
+const wishNotesInput = document.getElementById("wish-notes");
 
 const totalItemsEl = document.getElementById("total-items");
 const goodStockEl = document.getElementById("good-stock");
@@ -44,6 +52,7 @@ const monthlySpendEl = document.getElementById("monthly-spend");
 const syncIndicator = document.getElementById("sync-indicator");
 
 let refreshHandle = null;
+let syncInFlight = false;
 
 function loadInventory() {
   const saved = localStorage.getItem(STORAGE_KEY);
@@ -62,11 +71,29 @@ function persistInventory() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(inventory));
 }
 
+function loadWishlist() {
+  const saved = localStorage.getItem(WISHLIST_STORAGE_KEY);
+
+  if (!saved) return [];
+
+  try {
+    const parsed = JSON.parse(saved);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function persistWishlist() {
+  localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(wishlist));
+}
+
 function isSharedMode() {
   return Boolean(API_BASE_URL);
 }
 
 function setSyncStatus(text, state) {
+  if (!syncIndicator) return;
   syncIndicator.textContent = text;
   syncIndicator.dataset.state = state || "idle";
 }
@@ -85,20 +112,28 @@ function sanitizeItem(item, fallbackId) {
 }
 
 async function fetchSharedInventory() {
-  const response = await fetch(`${API_BASE_URL}?action=list`, {
-    method: "GET",
-    cache: "no-store"
-  });
+  if (syncInFlight) return;
 
-  if (!response.ok) {
-    throw new Error(`Failed to load shared inventory: ${response.status}`);
+  syncInFlight = true;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}?action=list`, {
+      method: "GET",
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to load shared inventory: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const items = Array.isArray(data.items) ? data.items : [];
+    inventory = items.map((item, index) => sanitizeItem(item, `shared-${index + 1}`));
+    renderDashboard();
+    setSyncStatus(APP_CONFIG.sharedModeLabel || "Shared mode", "connected");
+  } finally {
+    syncInFlight = false;
   }
-
-  const data = await response.json();
-  const items = Array.isArray(data.items) ? data.items : [];
-  inventory = items.map((item, index) => sanitizeItem(item, `shared-${index + 1}`));
-  renderDashboard();
-  setSyncStatus(APP_CONFIG.sharedModeLabel || "Shared mode", "connected");
 }
 
 async function saveSharedInventory() {
@@ -129,6 +164,7 @@ async function saveInventory() {
   if (isSharedMode()) {
     setSyncStatus("Syncing shared inventory...", "syncing");
     await saveSharedInventory();
+    await fetchSharedInventory();
     return;
   }
 
@@ -165,6 +201,16 @@ function startSharedRefresh() {
       setSyncStatus("Shared refresh failed", "error");
     }
   }, REFRESH_INTERVAL_MS);
+}
+
+async function refreshSharedInventory() {
+  if (!isSharedMode()) return;
+
+  try {
+    await fetchSharedInventory();
+  } catch (error) {
+    setSyncStatus("Shared refresh failed", "error");
+  }
 }
 
 function getStatus(item) {
@@ -291,6 +337,25 @@ function renderDashboard() {
   renderSummary(items);
   renderRestock(items);
   renderBreakdown(items);
+  renderWishlist();
+}
+
+function renderWishlist() {
+  if (!wishlist.length) {
+    wishlistItems.innerHTML = "<div class='wish-empty'>No requests yet. Add a suggested item for the pantry team to review.</div>";
+    return;
+  }
+
+  wishlistItems.innerHTML = wishlist.map((wish) => `
+    <article class="wish-item">
+      <div class="wish-top">
+        <strong>${wish.item}</strong>
+        <button class="table-btn delete-wish-btn" type="button" data-id="${wish.id}">Remove</button>
+      </div>
+      <p class="wish-meta">${wish.category} requested by ${wish.requester}</p>
+      <p class="wish-notes">${wish.notes || "No extra notes provided."}</p>
+    </article>
+  `).join("");
 }
 
 function openModal(item) {
@@ -356,6 +421,28 @@ async function resetInventory() {
   closeModal();
 }
 
+function addWish(event) {
+  event.preventDefault();
+
+  wishlist.unshift({
+    id: `wish-${Date.now()}`,
+    item: wishItemInput.value.trim(),
+    category: wishCategoryInput.value,
+    requester: wishRequesterInput.value.trim(),
+    notes: wishNotesInput.value.trim()
+  });
+
+  persistWishlist();
+  renderWishlist();
+  wishlistForm.reset();
+}
+
+function removeWish(id) {
+  wishlist = wishlist.filter((wish) => wish.id !== id);
+  persistWishlist();
+  renderWishlist();
+}
+
 searchInput.addEventListener("input", renderDashboard);
 categoryFilter.addEventListener("change", renderDashboard);
 addItemBtn.addEventListener("click", () => openModal());
@@ -363,6 +450,7 @@ closeModalBtn.addEventListener("click", closeModal);
 modalBackdrop.addEventListener("click", closeModal);
 inventoryForm.addEventListener("submit", upsertItem);
 resetDefaultsBtn.addEventListener("click", resetInventory);
+wishlistForm.addEventListener("submit", addWish);
 
 inventoryBody.addEventListener("click", (event) => {
   const button = event.target.closest("button");
@@ -382,9 +470,24 @@ inventoryBody.addEventListener("click", (event) => {
   }
 });
 
+wishlistItems.addEventListener("click", (event) => {
+  const button = event.target.closest("button");
+
+  if (!button || !button.classList.contains("delete-wish-btn")) return;
+
+  removeWish(button.dataset.id);
+});
+
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !editorModal.classList.contains("hidden")) {
     closeModal();
+  }
+});
+
+window.addEventListener("focus", refreshSharedInventory);
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    refreshSharedInventory();
   }
 });
 

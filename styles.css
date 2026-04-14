@@ -183,10 +183,7 @@ select {
 }
 
 .hero {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 24px;
+  display: block;
   padding: 28px 30px;
   border-radius: 32px;
 }
@@ -194,13 +191,6 @@ select {
 .hero h2 {
   font-size: clamp(2rem, 4vw, 3.4rem);
   max-width: 14ch;
-}
-
-.hero-copy {
-  max-width: 64ch;
-  margin: 14px 0 0;
-  font-size: 1rem;
-  line-height: 1.7;
 }
 
 .hero-brand-badge {
@@ -217,35 +207,149 @@ select {
   text-transform: uppercase;
 }
 
-.hero-actions {
+.hero-gallery {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+  width: 100%;
+}
+
+.gallery-tile {
+  min-height: 140px;
+  border-radius: 24px;
+  padding: 18px;
   display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  color: #fffaf2;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.tile-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+  background: rgba(255, 250, 242, 0.2);
+  position: relative;
+  display: block;
+}
+
+.tile-icon::before,
+.tile-icon::after {
+  content: "";
+  position: absolute;
+  background: rgba(255, 250, 242, 0.92);
+}
+
+.icon-drinks::before {
+  width: 26px;
+  height: 34px;
+  left: 23px;
+  top: 18px;
+  border-radius: 0 0 10px 10px;
+}
+
+.icon-drinks::after {
+  width: 4px;
+  height: 24px;
+  right: 16px;
+  top: 14px;
+  transform: rotate(18deg);
+}
+
+.icon-coffee::before {
+  width: 34px;
+  height: 20px;
+  left: 16px;
+  top: 26px;
+  border-radius: 0 0 12px 12px;
+}
+
+.icon-coffee::after {
+  width: 12px;
+  height: 12px;
+  right: 11px;
+  top: 28px;
+  border: 4px solid rgba(255, 250, 242, 0.92);
+  border-left: 0;
+  border-radius: 0 10px 10px 0;
+  background: transparent;
+}
+
+.icon-fruit::before {
+  width: 30px;
+  height: 30px;
+  left: 21px;
+  top: 21px;
+  border-radius: 50%;
+}
+
+.icon-fruit::after {
+  width: 14px;
+  height: 5px;
+  left: 34px;
+  top: 13px;
+  border-radius: 10px;
+  transform: rotate(-25deg);
+}
+
+.icon-snacks::before {
+  width: 36px;
+  height: 24px;
+  left: 18px;
+  top: 22px;
+  border-radius: 6px;
+}
+
+.icon-snacks::after {
+  width: 26px;
+  height: 4px;
+  left: 23px;
+  top: 32px;
+  border-radius: 999px;
+  box-shadow: 0 -8px 0 rgba(255, 250, 242, 0.92), 0 8px 0 rgba(255, 250, 242, 0.92);
+}
+
+.icon-dairy::before {
+  width: 24px;
+  height: 34px;
+  left: 24px;
+  top: 18px;
+  border-radius: 4px 4px 10px 10px;
+}
+
+.icon-dairy::after {
+  width: 12px;
+  height: 6px;
+  left: 30px;
+  top: 13px;
+  border-radius: 4px 4px 0 0;
+}
+
+.tile-drinks {
+  background: linear-gradient(135deg, #5ea9c7 0%, #1f5f7a 100%);
+}
+
+.tile-coffee {
+  background: linear-gradient(135deg, #8f654a 0%, #5a3623 100%);
+}
+
+.tile-fruit {
+  background: linear-gradient(135deg, #f2b05e 0%, #cf5e34 100%);
+}
+
+.tile-snacks {
+  background: linear-gradient(135deg, #d2a24d 0%, #9d6a21 100%);
+}
+
+.tile-dairy {
+  background: linear-gradient(135deg, #8ac7b8 0%, #3e7c59 100%);
 }
 
 button,
 input,
 select {
   font: inherit;
-}
-
-.primary-btn,
-.secondary-btn {
-  border-radius: 999px;
-  padding: 14px 20px;
-  border: 0;
-  cursor: pointer;
-}
-
-.primary-btn {
-  background: var(--orange);
-  color: white;
-}
-
-.secondary-btn {
-  background: #fff;
-  color: var(--text);
-  border: 1px solid var(--line);
 }
 
 .stats-grid {
@@ -288,6 +392,75 @@ select {
 .card {
   border-radius: 28px;
   padding: 22px;
+}
+
+.wishlist-card {
+  margin-top: 20px;
+}
+
+.wishlist-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.9fr) minmax(0, 1.4fr);
+  gap: 20px;
+}
+
+.wishlist-form {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 22px;
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+}
+
+.wishlist-form label {
+  display: grid;
+  gap: 8px;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.wishlist-form input,
+.wishlist-form select {
+  width: 100%;
+}
+
+.wishlist-items {
+  display: grid;
+  gap: 12px;
+}
+
+.wish-item {
+  padding: 16px;
+  border-radius: 20px;
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+}
+
+.wish-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.wish-item strong {
+  font-size: 1rem;
+}
+
+.wish-meta,
+.wish-notes {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.93rem;
+}
+
+.wish-empty {
+  padding: 20px;
+  border-radius: 20px;
+  background: var(--panel-strong);
+  border: 1px dashed var(--line);
+  color: var(--muted);
 }
 
 .stacked-column {
@@ -526,6 +699,10 @@ th {
   .sidebar {
     gap: 28px;
   }
+
+  .wishlist-layout {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 720px) {
@@ -542,7 +719,6 @@ th {
   }
 
   .toolbar,
-  .hero-actions,
   .table-actions {
     width: 100%;
   }
@@ -550,8 +726,6 @@ th {
   .search-field,
   .search-field input,
   select,
-  .primary-btn,
-  .secondary-btn,
   .table-btn,
   .icon-btn {
     width: 100%;
@@ -559,5 +733,10 @@ th {
 
   .inventory-form {
     grid-template-columns: 1fr;
+  }
+
+  .hero-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
   }
 }
