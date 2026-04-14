@@ -708,7 +708,7 @@ th {
 @media (max-width: 720px) {
   .main-content,
   .sidebar {
-    padding: 20px;
+    padding: 16px;
   }
 
   .hero,
@@ -716,6 +716,21 @@ th {
   .form-actions {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .card,
+  .stat-card,
+  .hero {
+    border-radius: 24px;
+  }
+
+  .hero {
+    padding: 20px;
+  }
+
+  .hero-brand-badge {
+    font-size: 0.74rem;
+    letter-spacing: 0.06em;
   }
 
   .toolbar,
@@ -731,6 +746,17 @@ th {
     width: 100%;
   }
 
+  .table-btn,
+  .icon-btn,
+  .search-field input,
+  select,
+  .wishlist-form input,
+  .wishlist-form select,
+  .inventory-form input,
+  .inventory-form select {
+    min-height: 46px;
+  }
+
   .inventory-form {
     grid-template-columns: 1fr;
   }
@@ -738,5 +764,185 @@ th {
   .hero-gallery {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     width: 100%;
+    gap: 10px;
+  }
+
+  .gallery-tile {
+    min-height: 108px;
+    padding: 12px;
+    border-radius: 18px;
+  }
+
+  .tile-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 16px;
+  }
+
+  .icon-drinks::before {
+    width: 20px;
+    height: 26px;
+    left: 19px;
+    top: 15px;
+  }
+
+  .icon-drinks::after {
+    width: 4px;
+    height: 18px;
+    right: 13px;
+    top: 12px;
+  }
+
+  .icon-coffee::before {
+    width: 28px;
+    height: 16px;
+    left: 12px;
+    top: 22px;
+  }
+
+  .icon-coffee::after {
+    width: 10px;
+    height: 10px;
+    right: 9px;
+    top: 23px;
+    border-width: 3px;
+  }
+
+  .icon-fruit::before {
+    width: 24px;
+    height: 24px;
+    left: 17px;
+    top: 18px;
+  }
+
+  .icon-fruit::after {
+    width: 10px;
+    height: 4px;
+    left: 28px;
+    top: 11px;
+  }
+
+  .icon-snacks::before {
+    width: 28px;
+    height: 18px;
+    left: 15px;
+    top: 20px;
+  }
+
+  .icon-snacks::after {
+    width: 20px;
+    left: 19px;
+    top: 27px;
+    box-shadow: 0 -7px 0 rgba(255, 250, 242, 0.92), 0 7px 0 rgba(255, 250, 242, 0.92);
+  }
+
+  .icon-dairy::before {
+    width: 19px;
+    height: 27px;
+    left: 20px;
+    top: 16px;
+  }
+
+  .icon-dairy::after {
+    width: 10px;
+    height: 5px;
+    left: 24px;
+    top: 12px;
+  }
+
+  .stats-grid {
+    gap: 12px;
+    margin: 18px 0;
+  }
+
+  .stat-card {
+    padding: 18px;
+  }
+
+  .stat-value {
+    font-size: 1.8rem;
+    margin-top: 10px;
+  }
+
+  .table-wrap {
+    overflow: visible;
+  }
+
+  table,
+  thead,
+  tbody,
+  tr,
+  th,
+  td {
+    display: block;
+    width: 100%;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tbody {
+    display: grid;
+    gap: 12px;
+  }
+
+  tr {
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--panel-strong);
+  }
+
+  td {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    text-align: right;
+  }
+
+  td:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  td::before {
+    content: attr(data-label);
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: left;
+  }
+
+  td.item-name {
+    display: block;
+    padding-top: 0;
+    text-align: left;
+    font-size: 1rem;
+  }
+
+  td.item-name::before {
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  td .table-actions {
+    justify-content: stretch;
+  }
+
+  .wish-top,
+  .restock-top,
+  .breakdown-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .wishlist-card {
+    margin-top: 16px;
   }
 }

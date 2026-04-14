@@ -310,12 +310,12 @@ function renderTable(items) {
 
     return `
       <tr>
-        <td class="item-name">${item.item}</td>
-        <td>${item.category}</td>
-        <td>${item.stock} units</td>
-        <td>${item.dailyUse}/day</td>
-        <td>${item.vendor}</td>
-        <td><span class="status-pill ${getStatusClass(status)}">${status}</span></td>
+        <td class="item-name" data-label="Item">${item.item}</td>
+        <td data-label="Category">${item.category}</td>
+        <td data-label="Stock">${item.stock} units</td>
+        <td data-label="Daily Use">${item.dailyUse}/day</td>
+        <td data-label="Vendor">${item.vendor}</td>
+        <td data-label="Status"><span class="status-pill ${getStatusClass(status)}">${status}</span></td>
         <td>
           <div class="table-actions">
             <button class="table-btn edit-btn" type="button" data-id="${item.id}">Edit</button>
