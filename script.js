@@ -340,9 +340,8 @@ function renderSummary(items) {
 
 function renderRestock(items) {
   const priorities = [...items]
-    .filter((item) => getStatus(item) !== "Good")
-    .sort((a, b) => (a.stock / a.threshold) - (b.stock / b.threshold))
-    .slice(0, 5);
+    .filter((item) => getStatus(item) === "Low")
+    .sort((a, b) => (a.stock / a.threshold) - (b.stock / b.threshold));
 
   restockList.innerHTML = priorities.map((item) => {
     const daysLeft = Math.max(1, Math.floor(item.stock / item.dailyUse));
