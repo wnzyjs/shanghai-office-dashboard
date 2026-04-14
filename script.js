@@ -291,6 +291,10 @@ function formatCurrency(amount) {
   }).format(amount);
 }
 
+function getDaysLeft(item) {
+  return Math.max(1, Math.ceil(item.stock / Math.max(item.dailyUse, 1)));
+}
+
 function filteredInventory() {
   const query = searchInput.value.trim().toLowerCase();
   const category = categoryFilter.value;
@@ -341,10 +345,14 @@ function renderSummary(items) {
 function renderRestock(items) {
   const priorities = [...items]
     .filter((item) => getStatus(item) === "Low")
-    .sort((a, b) => (a.stock / Math.max(a.dailyUse, 1)) - (b.stock / Math.max(b.dailyUse, 1)));
+    .sort((a, b) => {
+      const daysDiff = getDaysLeft(a) - getDaysLeft(b);
+      if (daysDiff !== 0) return daysDiff;
+      return (a.stock / Math.max(a.dailyUse, 1)) - (b.stock / Math.max(b.dailyUse, 1));
+    });
 
   restockList.innerHTML = priorities.map((item) => {
-    const daysLeft = Math.max(1, Math.floor(item.stock / item.dailyUse));
+    const daysLeft = getDaysLeft(item);
     const fill = Math.min(100, Math.round((item.stock / item.threshold) * 100));
 
     return `
