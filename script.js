@@ -1,4 +1,7 @@
 const STORAGE_KEY = "applied-value-shanghai-inventory";
+const APP_CONFIG = window.APP_CONFIG || {};
+const API_BASE_URL = (APP_CONFIG.apiBaseUrl || "").trim();
+const REFRESH_INTERVAL_MS = Number(APP_CONFIG.refreshIntervalMs) || 15000;
 const defaultInventory = [
   { id: "item-1", item: "Sparkling Water", category: "Beverages", stock: 96, dailyUse: 18, vendor: "AquaPure", monthlySpend: 180, threshold: 40 },
   { id: "item-2", item: "Cold Brew Cans", category: "Beverages", stock: 22, dailyUse: 10, vendor: "Roast Lab", monthlySpend: 240, threshold: 30 },
@@ -38,6 +41,9 @@ const totalItemsEl = document.getElementById("total-items");
 const goodStockEl = document.getElementById("good-stock");
 const lowStockEl = document.getElementById("low-stock");
 const monthlySpendEl = document.getElementById("monthly-spend");
+const syncIndicator = document.getElementById("sync-indicator");
+
+let refreshHandle = null;
 
 function loadInventory() {
   const saved = localStorage.getItem(STORAGE_KEY);
@@ -54,6 +60,111 @@ function loadInventory() {
 
 function persistInventory() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(inventory));
+}
+
+function isSharedMode() {
+  return Boolean(API_BASE_URL);
+}
+
+function setSyncStatus(text, state) {
+  syncIndicator.textContent = text;
+  syncIndicator.dataset.state = state || "idle";
+}
+
+function sanitizeItem(item, fallbackId) {
+  return {
+    id: String(item.id || fallbackId),
+    item: String(item.item || "").trim(),
+    category: String(item.category || "Beverages").trim(),
+    stock: Number(item.stock) || 0,
+    dailyUse: Number(item.dailyUse) || 0,
+    vendor: String(item.vendor || "").trim(),
+    monthlySpend: Number(item.monthlySpend) || 0,
+    threshold: Math.max(1, Number(item.threshold) || 1)
+  };
+}
+
+async function fetchSharedInventory() {
+  const response = await fetch(`${API_BASE_URL}?action=list`, {
+    method: "GET",
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to load shared inventory: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const items = Array.isArray(data.items) ? data.items : [];
+  inventory = items.map((item, index) => sanitizeItem(item, `shared-${index + 1}`));
+  renderDashboard();
+  setSyncStatus(APP_CONFIG.sharedModeLabel || "Shared mode", "connected");
+}
+
+async function saveSharedInventory() {
+  const response = await fetch(API_BASE_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8"
+    },
+    body: JSON.stringify({
+      action: "save",
+      items: inventory
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to save shared inventory: ${response.status}`);
+  }
+
+  const data = await response.json();
+  if (!data.ok) {
+    throw new Error("Shared inventory save was rejected");
+  }
+
+  setSyncStatus(`${APP_CONFIG.sharedModeLabel || "Shared mode"} synced`, "connected");
+}
+
+async function saveInventory() {
+  if (isSharedMode()) {
+    setSyncStatus("Syncing shared inventory...", "syncing");
+    await saveSharedInventory();
+    return;
+  }
+
+  persistInventory();
+  setSyncStatus("Local mode", "local");
+}
+
+async function initializeInventory() {
+  if (!isSharedMode()) {
+    inventory = loadInventory();
+    setSyncStatus("Local mode", "local");
+    renderDashboard();
+    return;
+  }
+
+  setSyncStatus("Connecting to shared inventory...", "syncing");
+
+  try {
+    await fetchSharedInventory();
+  } catch (error) {
+    inventory = loadInventory();
+    renderDashboard();
+    setSyncStatus("Shared sync failed - using local mode", "error");
+  }
+}
+
+function startSharedRefresh() {
+  if (!isSharedMode()) return;
+
+  refreshHandle = window.setInterval(async () => {
+    try {
+      await fetchSharedInventory();
+    } catch (error) {
+      setSyncStatus("Shared refresh failed", "error");
+    }
+  }, REFRESH_INTERVAL_MS);
 }
 
 function getStatus(item) {
@@ -205,7 +316,7 @@ function closeModal() {
   editIdInput.value = "";
 }
 
-function upsertItem(event) {
+async function upsertItem(event) {
   event.preventDefault();
 
   const itemData = {
@@ -227,21 +338,21 @@ function upsertItem(event) {
     inventory.unshift(itemData);
   }
 
-  persistInventory();
   renderDashboard();
+  await saveInventory();
   closeModal();
 }
 
-function removeItem(id) {
+async function removeItem(id) {
   inventory = inventory.filter((item) => item.id !== id);
-  persistInventory();
   renderDashboard();
+  await saveInventory();
 }
 
-function resetInventory() {
+async function resetInventory() {
   inventory = [...defaultInventory];
-  persistInventory();
   renderDashboard();
+  await saveInventory();
   closeModal();
 }
 
@@ -277,4 +388,5 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-renderDashboard();
+initializeInventory();
+startSharedRefresh();
