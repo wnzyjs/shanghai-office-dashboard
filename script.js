@@ -53,6 +53,7 @@ const syncIndicator = document.getElementById("sync-indicator");
 
 let refreshHandle = null;
 let syncInFlight = false;
+let wishlistSyncInFlight = false;
 
 function loadInventory() {
   const saved = localStorage.getItem(STORAGE_KEY);
@@ -86,6 +87,58 @@ function loadWishlist() {
 
 function persistWishlist() {
   localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(wishlist));
+}
+
+async function fetchSharedWishlist() {
+  if (!isSharedMode() || wishlistSyncInFlight) return;
+
+  wishlistSyncInFlight = true;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}?action=listWishlist`, {
+      method: "GET",
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to load shared wishlist: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const items = Array.isArray(data.items) ? data.items : [];
+    wishlist = items.map((item, index) => ({
+      id: String(item.id || `wish-${index + 1}`),
+      item: String(item.item || "").trim(),
+      category: String(item.category || "Snacks").trim(),
+      requester: String(item.requester || "").trim(),
+      notes: String(item.notes || "").trim()
+    }));
+    renderWishlist();
+  } finally {
+    wishlistSyncInFlight = false;
+  }
+}
+
+async function saveSharedWishlist() {
+  const response = await fetch(API_BASE_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8"
+    },
+    body: JSON.stringify({
+      action: "saveWishlist",
+      items: wishlist
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to save shared wishlist: ${response.status}`);
+  }
+
+  const data = await response.json();
+  if (!data.ok) {
+    throw new Error("Shared wishlist save was rejected");
+  }
 }
 
 function isSharedMode() {
@@ -175,6 +228,7 @@ async function saveInventory() {
 async function initializeInventory() {
   if (!isSharedMode()) {
     inventory = loadInventory();
+    wishlist = loadWishlist();
     setSyncStatus("Local mode", "local");
     renderDashboard();
     return;
@@ -184,8 +238,10 @@ async function initializeInventory() {
 
   try {
     await fetchSharedInventory();
+    await fetchSharedWishlist();
   } catch (error) {
     inventory = loadInventory();
+    wishlist = loadWishlist();
     renderDashboard();
     setSyncStatus("Shared sync failed - using local mode", "error");
   }
@@ -208,6 +264,7 @@ async function refreshSharedInventory() {
 
   try {
     await fetchSharedInventory();
+    await fetchSharedWishlist();
   } catch (error) {
     setSyncStatus("Shared refresh failed", "error");
   }
@@ -422,6 +479,7 @@ async function resetInventory() {
 }
 
 function addWish(event) {
+async function addWish(event) {
   event.preventDefault();
 
   wishlist.unshift({
@@ -432,15 +490,29 @@ function addWish(event) {
     notes: wishNotesInput.value.trim()
   });
 
-  persistWishlist();
   renderWishlist();
   wishlistForm.reset();
+
+  if (isSharedMode()) {
+    await saveSharedWishlist();
+    await fetchSharedWishlist();
+    return;
+  }
+
+  persistWishlist();
 }
 
-function removeWish(id) {
+async function removeWish(id) {
   wishlist = wishlist.filter((wish) => wish.id !== id);
-  persistWishlist();
   renderWishlist();
+
+  if (isSharedMode()) {
+    await saveSharedWishlist();
+    await fetchSharedWishlist();
+    return;
+  }
+
+  persistWishlist();
 }
 
 searchInput.addEventListener("input", renderDashboard);
