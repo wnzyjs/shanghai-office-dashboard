@@ -253,6 +253,7 @@ function startSharedRefresh() {
   refreshHandle = window.setInterval(async () => {
     try {
       await fetchSharedInventory();
+      await fetchSharedWishlist();
     } catch (error) {
       setSyncStatus("Shared refresh failed", "error");
     }
@@ -478,7 +479,6 @@ async function resetInventory() {
   closeModal();
 }
 
-function addWish(event) {
 async function addWish(event) {
   event.preventDefault();
 
