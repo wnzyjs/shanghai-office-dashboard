@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Office Food & Beverage Inventory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div>
+        <div class="brand-lockup" aria-label="Applied Value Shanghai Office">
+          <div class="brand-mark">AV</div>
+          <div class="brand-text">
+            <strong>Applied Value</strong>
+            <span>Shanghai Office</span>
+          </div>
+        </div>
+        <p class="eyebrow">Pantry Ops</p>
+        <h1>Office Food & Beverage Inventory</h1>
+        <p class="sidebar-copy">Track snacks, drinks, and restock timing in one place for the whole office.</p>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Sections">
+        <a href="#overview" class="nav-link active">Overview</a>
+        <a href="#inventory" class="nav-link">Inventory</a>
+        <a href="#restock" class="nav-link">Restock Watch</a>
+      </nav>
+
+      <section class="sidebar-panel">
+        <p class="panel-label">Today's focus</p>
+        <div class="focus-chip">
+          <strong>5 items</strong>
+          <span>need restocking before Friday</span>
+        </div>
+        <div class="focus-chip">
+          <strong>2 vendors</strong>
+          <span>scheduled for delivery this week</span>
+        </div>
+      </section>
+    </aside>
+
+    <main class="main-content">
+      <section class="hero" id="overview">
+        <div>
+          <div class="hero-brand-badge">Applied Value Shanghai Office</div>
+          <p class="eyebrow">Dashboard</p>
+          <h2>Keep your kitchen stocked without the spreadsheet chaos.</h2>
+          <p class="hero-copy">Monitor current stock, flag low inventory, and prioritize the next snack or beverage order for the team.</p>
+        </div>
+        <div class="hero-actions">
+          <button class="primary-btn" type="button">Generate Restock List</button>
+          <button class="secondary-btn" type="button">Export Snapshot</button>
+        </div>
+      </section>
+
+      <section class="stats-grid" aria-label="Inventory summary">
+        <article class="stat-card accent-orange">
+          <span class="stat-label">Total Items</span>
+          <strong class="stat-value" id="total-items">0</strong>
+          <span class="stat-footnote">Across all pantry categories</span>
+        </article>
+        <article class="stat-card accent-green">
+          <span class="stat-label">In Good Stock</span>
+          <strong class="stat-value" id="good-stock">0</strong>
+          <span class="stat-footnote">Healthy buffer available</span>
+        </article>
+        <article class="stat-card accent-red">
+          <span class="stat-label">Low Stock</span>
+          <strong class="stat-value" id="low-stock">0</strong>
+          <span class="stat-footnote">Needs attention soon</span>
+        </article>
+        <article class="stat-card accent-blue">
+          <span class="stat-label">Monthly Spend</span>
+          <strong class="stat-value" id="monthly-spend">$0</strong>
+          <span class="stat-footnote">Estimated vendor outlay</span>
+        </article>
+      </section>
+
+      <section class="content-grid">
+        <section class="card inventory-card" id="inventory">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Inventory</p>
+              <h3>Current stock levels</h3>
+            </div>
+            <div class="toolbar">
+              <button class="primary-btn" id="add-item-btn" type="button">Add Item</button>
+              <label class="search-field">
+                <span class="sr-only">Search inventory</span>
+                <input id="search-input" type="search" placeholder="Search item or vendor">
+              </label>
+              <select id="category-filter" aria-label="Filter by category">
+                <option value="all">All categories</option>
+                <option value="Beverages">Beverages</option>
+                <option value="Snacks">Snacks</option>
+                <option value="Fresh">Fresh</option>
+                <option value="Supplies">Supplies</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Category</th>
+                  <th>Stock</th>
+                  <th>Daily Use</th>
+                  <th>Vendor</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="inventory-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="stacked-column">
+          <section class="card mini-card" id="restock">
+            <div class="section-head compact">
+              <div>
+                <p class="eyebrow">Restock Watch</p>
+                <h3>Priority items</h3>
+              </div>
+            </div>
+            <div id="restock-list" class="restock-list"></div>
+          </section>
+
+          <section class="card mini-card">
+            <div class="section-head compact">
+              <div>
+                <p class="eyebrow">Category Mix</p>
+                <h3>What the office consumes</h3>
+              </div>
+            </div>
+            <div id="category-breakdown" class="breakdown-list"></div>
+          </section>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-shell hidden" id="editor-modal" aria-hidden="true">
+    <div class="modal-backdrop" id="modal-backdrop"></div>
+    <section class="modal-card" aria-labelledby="editor-title">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">Inventory Editor</p>
+          <h3 id="editor-title">Add pantry item</h3>
+        </div>
+        <button class="icon-btn" id="close-modal-btn" type="button" aria-label="Close editor">x</button>
+      </div>
+
+      <form id="inventory-form" class="inventory-form">
+        <input id="edit-id" type="hidden">
+
+        <label>
+          <span>Item name</span>
+          <input id="item-name" name="item" type="text" required>
+        </label>
+
+        <label>
+          <span>Category</span>
+          <select id="item-category" name="category" required>
+            <option value="Beverages">Beverages</option>
+            <option value="Snacks">Snacks</option>
+            <option value="Fresh">Fresh</option>
+            <option value="Supplies">Supplies</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Current stock</span>
+          <input id="item-stock" name="stock" type="number" min="0" required>
+        </label>
+
+        <label>
+          <span>Daily use</span>
+          <input id="item-daily-use" name="dailyUse" type="number" min="0" required>
+        </label>
+
+        <label>
+          <span>Vendor</span>
+          <input id="item-vendor" name="vendor" type="text" required>
+        </label>
+
+        <label>
+          <span>Monthly spend</span>
+          <input id="item-monthly-spend" name="monthlySpend" type="number" min="0" required>
+        </label>
+
+        <label>
+          <span>Reorder threshold</span>
+          <input id="item-threshold" name="threshold" type="number" min="1" required>
+        </label>
+
+        <div class="form-actions">
+          <button class="secondary-btn" id="reset-defaults-btn" type="button">Reset Sample Data</button>
+          <button class="primary-btn" type="submit">Save Item</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
