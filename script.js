@@ -292,7 +292,11 @@ function formatCurrency(amount) {
 }
 
 function getDaysLeft(item) {
-  return Math.max(1, Math.ceil(item.stock / Math.max(item.dailyUse, 1)));
+  if (item.dailyUse <= 0) {
+    return item.stock > 0 ? Number.POSITIVE_INFINITY : 0;
+  }
+
+  return Math.max(1, Math.ceil(item.stock / item.dailyUse));
 }
 
 function filteredInventory() {
@@ -348,7 +352,9 @@ function renderRestock(items) {
     .sort((a, b) => {
       const daysDiff = getDaysLeft(a) - getDaysLeft(b);
       if (daysDiff !== 0) return daysDiff;
-      return (a.stock / Math.max(a.dailyUse, 1)) - (b.stock / Math.max(b.dailyUse, 1));
+      const aRatio = a.dailyUse > 0 ? a.stock / a.dailyUse : Number.POSITIVE_INFINITY;
+      const bRatio = b.dailyUse > 0 ? b.stock / b.dailyUse : Number.POSITIVE_INFINITY;
+      return aRatio - bRatio;
     });
 
   restockList.innerHTML = priorities.map((item) => {
