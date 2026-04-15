@@ -23,6 +23,7 @@ const restockList = document.getElementById("restock-list");
 const categoryBreakdown = document.getElementById("category-breakdown");
 const searchInput = document.getElementById("search-input");
 const categoryFilter = document.getElementById("category-filter");
+const sidebarExportWishlistBtn = document.getElementById("sidebar-export-wishlist-btn");
 const addItemBtn = document.getElementById("add-item-btn");
 const editorModal = document.getElementById("editor-modal");
 const modalBackdrop = document.getElementById("modal-backdrop");
@@ -624,6 +625,7 @@ inventoryForm.addEventListener("submit", upsertItem);
 resetDefaultsBtn.addEventListener("click", resetInventory);
 wishlistForm.addEventListener("submit", addWish);
 exportWishlistBtn.addEventListener("click", exportWishlist);
+sidebarExportWishlistBtn.addEventListener("click", exportWishlist);
 
 inventoryBody.addEventListener("click", (event) => {
   const button = event.target.closest("button");

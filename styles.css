@@ -140,6 +140,23 @@ select {
   background: rgba(255, 255, 255, 0.12);
 }
 
+.sidebar-export-btn {
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 246, 234, 0.18);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff6ea;
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sidebar-export-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
 .sidebar-panel {
   display: grid;
   gap: 12px;
