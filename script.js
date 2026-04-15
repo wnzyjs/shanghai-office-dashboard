@@ -40,6 +40,7 @@ const itemMonthlySpendInput = document.getElementById("item-monthly-spend");
 const itemThresholdInput = document.getElementById("item-threshold");
 const wishlistForm = document.getElementById("wishlist-form");
 const wishlistItems = document.getElementById("wishlist-items");
+const exportWishlistBtn = document.getElementById("export-wishlist-btn");
 const wishItemInput = document.getElementById("wish-item");
 const wishCategoryInput = document.getElementById("wish-category");
 const wishRequesterInput = document.getElementById("wish-requester");
@@ -97,7 +98,8 @@ async function fetchSharedWishlist() {
   try {
     const response = await fetch(`${API_BASE_URL}?action=listWishlist`, {
       method: "GET",
-      cache: "no-store"
+      cache: "no-store",
+      headers: undefined
     });
 
     if (!response.ok) {
@@ -172,7 +174,8 @@ async function fetchSharedInventory() {
   try {
     const response = await fetch(`${API_BASE_URL}?action=list`, {
       method: "GET",
-      cache: "no-store"
+      cache: "no-store",
+      headers: undefined
     });
 
     if (!response.ok) {
@@ -528,6 +531,90 @@ async function removeWish(id) {
   persistWishlist();
 }
 
+function exportWishlist() {
+  const dateStamp = new Date().toISOString().slice(0, 10);
+  const rows = wishlist.length ? wishlist.map((wish) => `
+    <tr>
+      <td>${escapeHtml(wish.item)}</td>
+      <td>${escapeHtml(wish.category)}</td>
+      <td>${escapeHtml(wish.requester)}</td>
+      <td>${escapeHtml(wish.notes || "-")}</td>
+    </tr>
+  `).join("") : `
+    <tr>
+      <td colspan="4">No wishlist items available.</td>
+    </tr>
+  `;
+
+  const printWindow = window.open("", "_blank", "width=900,height=700");
+  if (!printWindow) return;
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <title>Wish List PDF</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          margin: 32px;
+          color: #2b241f;
+        }
+        h1 {
+          margin: 0 0 8px;
+          font-size: 24px;
+        }
+        p {
+          margin: 0 0 24px;
+          color: #6b5b4f;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+        th, td {
+          border: 1px solid #d7cab8;
+          padding: 10px 12px;
+          text-align: left;
+          vertical-align: top;
+        }
+        th {
+          background: #f4eadc;
+        }
+      </style>
+    </head>
+    <body>
+      <h1>Office Wish List</h1>
+      <p>Export date: ${dateStamp}</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Category</th>
+            <th>Requested By</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 searchInput.addEventListener("input", renderDashboard);
 categoryFilter.addEventListener("change", renderDashboard);
 addItemBtn.addEventListener("click", () => openModal());
@@ -536,6 +623,7 @@ modalBackdrop.addEventListener("click", closeModal);
 inventoryForm.addEventListener("submit", upsertItem);
 resetDefaultsBtn.addEventListener("click", resetInventory);
 wishlistForm.addEventListener("submit", addWish);
+exportWishlistBtn.addEventListener("click", exportWishlist);
 
 inventoryBody.addEventListener("click", (event) => {
   const button = event.target.closest("button");
