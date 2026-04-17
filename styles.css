@@ -578,6 +578,11 @@ th {
   color: var(--red);
 }
 
+.status-out {
+  background: #2f2925;
+  color: #fff6ea;
+}
+
 .status-medium {
   background: var(--orange-soft);
   color: var(--orange);

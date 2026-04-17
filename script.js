@@ -276,12 +276,14 @@ async function refreshSharedInventory() {
 }
 
 function getStatus(item) {
+  if (item.stock <= 0) return "Out of stock";
   if (item.stock <= item.threshold) return "Low";
   if (item.stock <= item.threshold * 1.5) return "Watch";
   return "Good";
 }
 
 function getStatusClass(status) {
+  if (status === "Out of stock") return "status-out";
   if (status === "Low") return "status-low";
   if (status === "Watch") return "status-medium";
   return "status-good";
@@ -356,7 +358,7 @@ function renderSummary(items) {
 
 function renderRestock(items) {
   const priorities = [...items]
-    .filter((item) => getStatus(item) === "Low")
+    .filter((item) => ["Low", "Out of stock"].includes(getStatus(item)))
     .sort((a, b) => {
       const daysDiff = getDaysLeft(a) - getDaysLeft(b);
       if (daysDiff !== 0) return daysDiff;
