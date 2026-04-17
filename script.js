@@ -296,6 +296,10 @@ function formatCurrency(amount) {
 }
 
 function getDaysLeft(item) {
+  if (item.stock <= 0) {
+    return 0;
+  }
+
   if (item.dailyUse <= 0) {
     return item.stock > 0 ? Number.POSITIVE_INFINITY : 0;
   }
@@ -364,12 +368,13 @@ function renderRestock(items) {
   restockList.innerHTML = priorities.map((item) => {
     const daysLeft = getDaysLeft(item);
     const fill = Number.isFinite(daysLeft) ? Math.min(100, Math.round((daysLeft / 30) * 100)) : 100;
+    const daysLeftLabel = item.stock <= 0 ? "Out of stock" : `${daysLeft} day${daysLeft > 1 ? "s" : ""} left`;
 
     return `
       <article class="restock-item">
         <div class="restock-top">
           <strong>${item.item}</strong>
-          <span>${daysLeft} day${daysLeft > 1 ? "s" : ""} left</span>
+          <span>${daysLeftLabel}</span>
         </div>
         <p class="restock-meta">${item.stock} units on hand - reorder at ${item.threshold} - ${item.vendor}</p>
         <div class="progress-track">
